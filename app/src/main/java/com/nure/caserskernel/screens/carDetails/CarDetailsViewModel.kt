@@ -21,7 +21,8 @@ class CarDetailsViewModel(application: Application) : AndroidViewModel(applicati
 
     private var carID: String? = null
 
-    var carInfo: MutableLiveData<VerifiedCar?> = MutableLiveData(null)
+    private var _carInfo: MutableLiveData<VerifiedCar?> = MutableLiveData(null)
+    var carInfo: LiveData<VerifiedCar?> = _carInfo
 
     fun configure(carID: String) {
         this.carID = carID
@@ -32,9 +33,13 @@ class CarDetailsViewModel(application: Application) : AndroidViewModel(applicati
             val result = carsRepo.getCar(carID ?: "")
             withContext(Dispatchers.Main) {
                 if(result.isSuccessful) {
-                    carInfo.value = result.body()?.toVerifiedCar()
+                    _carInfo.value = result.body()?.toVerifiedCar()
                 }
             }
         }
+    }
+
+    fun verify(cargoNumber: String) {
+
     }
 }
