@@ -63,7 +63,19 @@ fun CarDetailsContent(
     val carInfo = carDetailsViewModel.carInfo.observeAsState()
     val carInfoValue = carInfo.value
     if(carInfoValue != null) {
-        TitledGrid(carInfo = carInfoValue, onClick = { carDetailsViewModel.verify(it) })
+        Box(modifier = Modifier.fillMaxSize()) {
+            TitledGrid(
+                carInfo = carInfoValue,
+                onClick = { carDetailsViewModel.verify(it) }
+            )
+            Button(
+                modifier = Modifier.padding(10.dp).align(Alignment.BottomCenter),
+                enabled = false,
+                onClick = { /*TODO*/ }
+            ) {
+                Text("Дозволити відправлення")
+            }
+        }
     } else {
         CircularProgressIndicator()
     }
@@ -75,7 +87,9 @@ fun TitledGrid(
     carInfo: VerifiedCar,
     onClick: (String) -> Unit
 ) {
-    Surface {
+    Surface(
+        modifier = Modifier.fillMaxSize()
+    ) {
         LazyVerticalGrid(
             cells = GridCells.Fixed(2),
             contentPadding = PaddingValues(
