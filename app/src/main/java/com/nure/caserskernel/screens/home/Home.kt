@@ -41,7 +41,12 @@ fun Home(
         topBar = {
             TopAppBar(
                 title = { Text("Черга") },
-                backgroundColor = Color.White
+                backgroundColor = Color.White,
+                navigationIcon = {
+                    IconButton(onClick = { /*TODO: navigate to profile*/ }) {
+                        Image(rememberVectorPainter(image = Icons.Default.AccountBox), "")
+                    }
+                }
             )
         },
     ) {

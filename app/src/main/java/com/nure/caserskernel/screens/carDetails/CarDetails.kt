@@ -3,19 +3,26 @@ package com.nure.caserskernel.screens.carDetails
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,7 +76,9 @@ fun CarDetailsContent(
                 onClick = { carDetailsViewModel.verify(it) }
             )
             Button(
-                modifier = Modifier.padding(10.dp).align(Alignment.BottomCenter),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .align(Alignment.BottomCenter),
                 enabled = false,
                 onClick = { /*TODO*/ }
             ) {
@@ -105,7 +114,13 @@ fun TitledGrid(
                         title = carInfo.sign
                     )
                 }
-                item { Spacer(Modifier.width(0.dp)) }
+                item {
+                    Row(horizontalArrangement = Arrangement.End) {
+                        IconButton(onClick = { /*TODO: navigate to scan label*/ }) {
+                            Image(Icons.Default.Add, "")
+                        }
+                    }
+                }
                 items(carInfo.sealedCargo) {
                     CargoCard(cargo = it, onClick = onClick)
                 }
@@ -119,7 +134,13 @@ fun TitledGrid(
                             title = trailer.sign
                         )
                     }
-                    item { Spacer(Modifier.width(0.dp)) }
+                    item {
+                        Row(horizontalArrangement = Arrangement.End) {
+                            IconButton(onClick = { /*TODO: navigate to scan label*/ }) {
+                                Image(Icons.Default.Add, "")
+                            }
+                        }
+                    }
                     items(trailer.sealedCargo) {
                         CargoCard(cargo = it, onClick = onClick)
                     }
@@ -135,6 +156,7 @@ fun TitledRow(
     title: String
 ) {
     Row(
+        Modifier.height(45.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -171,12 +193,18 @@ fun CargoCard(
     cargo: VerifiedSealedCargo,
     onClick: (String) -> Unit
 ) {
+    val openDialog = remember { mutableStateOf(false) }
+    if (openDialog.value) {
+        DeleteAlertDialog(
+            onDismiss = { openDialog.value = false },
+            onConfirm = { /*TODO*/ }
+        )
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
             .clickable {
-                // TODO: Implement verification
                 onClick(cargo.wrapped.number)
             },
         elevation = 8.dp
@@ -184,14 +212,59 @@ fun CargoCard(
         Box(
             Modifier.padding(16.dp)
         ) {
-            Column(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(cargo.wrapped.number)
-                VerificationStatus(isVerified = cargo.isVerified)
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(cargo.wrapped.number)
+                    VerificationStatus(isVerified = cargo.isVerified)
+                }
+                Spacer(Modifier.width(12.dp))
+                IconButton(
+                    onClick = {
+                        openDialog.value = true
+                    }
+                ) {
+                    Image(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = ""
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+fun DeleteAlertDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Видалення ЗПУ")
+        },
+        text = {
+            Text("Ви впевнені, що хочете видалите це ЗПУ зі списку?")
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm
+            ) {
+                Text("Видалити")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss
+            ) {
+                Text("Скасувати")
+            }
+        }
+    )
 }
