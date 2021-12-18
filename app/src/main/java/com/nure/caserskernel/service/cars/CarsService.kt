@@ -17,23 +17,23 @@ interface CarsService {
     suspend fun getCar(@Path("carID") carID: String): Response<Car>
 
     @DELETE("api/cars/{carID}/depart")
-    suspend fun departCar(@Path("carID") carID: String)
+    suspend fun departCar(@Path("carID") carID: String): Response<Unit>
     @DELETE("/api/cars/{carID}/remove/{cargoNumber}")
     suspend fun removeCargo(
         @Path("carID") carID: String,
         @Path("cargoNumber") cargoNumber: String
-    )
+    ): Response<Unit>
 
     @POST("/api/cars/{carID}/add/{cargoNumber}")
     suspend fun addCarCargo(
         @Path("carID") carID: String,
         @Path("cargoNumber") cargoNumber: String
-    )
+    ): Response<Unit>
     @POST("/api/cars/trailer/{trailerID}/add/{cargoNumber}")
     suspend fun addTrailerCargo(
         @Path("trailerID") trailerID: String,
         @Path("cargoNumber") cargoNumber: String
-    )
+    ): Response<Unit>
 
     companion object {
         val shared: CarsService by lazy {
