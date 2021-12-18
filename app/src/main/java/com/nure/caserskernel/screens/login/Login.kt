@@ -12,12 +12,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.nure.caserskernel.Screen
 
 @Composable
-fun LoginContent(viewModel: LoginActivityViewModel) {
-    val username = viewModel.username.observeAsState("")
-    val password = viewModel.password.observeAsState("")
-    val hasErrors = viewModel.hasErrors.observeAsState(false)
+fun LoginContent(
+    loginViewModel: LoginActivityViewModel = viewModel(),
+    navController: NavController
+) {
+    val username = loginViewModel.username.observeAsState("")
+    val password = loginViewModel.password.observeAsState("")
+    val hasErrors = loginViewModel.hasErrors.observeAsState(false)
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -27,7 +33,7 @@ fun LoginContent(viewModel: LoginActivityViewModel) {
     ) {
         OutlinedTextField(
             value = username.value,
-            onValueChange = { viewModel.onUsernameChanged(it) },
+            onValueChange = { loginViewModel.onUsernameChanged(it) },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Username") },
             singleLine = true
@@ -35,7 +41,7 @@ fun LoginContent(viewModel: LoginActivityViewModel) {
         Spacer(Modifier.height(16.dp))
         OutlinedTextField(
             value = password.value,
-            onValueChange = { viewModel.onPasswordChanged(it) },
+            onValueChange = { loginViewModel.onPasswordChanged(it) },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
@@ -46,7 +52,10 @@ fun LoginContent(viewModel: LoginActivityViewModel) {
         }
         Spacer(Modifier.height(64.dp))
         Button(
-            onClick = { viewModel.onLoginButtonClick() },
+            onClick = {
+                loginViewModel.onLoginButtonClick()
+                navController.navigate(route = Screen.MainScreen.route)
+                      },
             modifier = Modifier.fillMaxWidth(0.75F),
             shape = RoundedCornerShape(12.dp),
             contentPadding = PaddingValues(

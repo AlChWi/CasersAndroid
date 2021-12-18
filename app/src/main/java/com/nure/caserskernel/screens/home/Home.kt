@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import com.nure.caserskernel.R
 import com.nure.caserskernel.Screen
 import com.nure.caserskernel.service.cars.Car
+import com.nure.caserskernel.service.cars.VerifiedCar
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -43,7 +44,9 @@ fun Home(
                 title = { Text("Черга") },
                 backgroundColor = Color.White,
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO: navigate to profile*/ }) {
+                    IconButton(onClick = {
+                        navController.navigate(Screen.Profile.route)
+                    }) {
                         Image(rememberVectorPainter(image = Icons.Default.AccountBox), "")
                     }
                 }
@@ -78,7 +81,7 @@ fun Home(
 
 @Composable
 fun HomeScreenCard(
-    car: Car,
+    car: VerifiedCar,
     onClick: () -> Unit
 ) {
     Card(

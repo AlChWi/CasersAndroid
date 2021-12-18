@@ -13,6 +13,7 @@ interface AuthService {
 
     companion object {
         private var _token: Token? = null
+        var onChangeToken: (Token?) -> Unit = {}
 
         val shared: AuthService by lazy {
             val retrofit = Retrofit.Builder()
@@ -24,6 +25,7 @@ interface AuthService {
 
         fun setToken(token: Token?) {
             _token = token
+            onChangeToken(token)
         }
 
         fun getToken(): Token? {

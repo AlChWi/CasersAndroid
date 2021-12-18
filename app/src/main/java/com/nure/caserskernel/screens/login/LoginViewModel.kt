@@ -60,7 +60,6 @@ class LoginActivityViewModel(application: Application) : AndroidViewModel(applic
                     AuthService.setToken(token)
                     if(token != null) {
                         saveToken(token)
-                        _isAuthenticated.value = true
                     }
                 } else {
                     _hasErrors.value = true

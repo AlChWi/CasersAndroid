@@ -41,8 +41,7 @@ fun CarDetails(
     carDetailsViewModel: CarDetailsViewModel = viewModel(),
     navController: NavController
 ) {
-    carDetailsViewModel.configure(carID)
-    carDetailsViewModel.onAppear()
+    carDetailsViewModel.onAppear(carID)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -58,29 +57,37 @@ fun CarDetails(
             )
         },
     ) {
-        CarDetailsContent(carDetailsViewModel = carDetailsViewModel)
+        CarDetailsContent(
+            carDetailsViewModel = carDetailsViewModel,
+            onDepartCar = { navController.popBackStack() }
+        )
     }
 }
 
 @ExperimentalFoundationApi
 @Composable
 fun CarDetailsContent(
-    carDetailsViewModel: CarDetailsViewModel
+    carDetailsViewModel: CarDetailsViewModel,
+    onDepartCar: (String) -> Unit
 ) {
     val carInfo = carDetailsViewModel.carInfo.observeAsState()
     val carInfoValue = carInfo.value
-    if(carInfoValue != null) {
+    if (carInfoValue != null) {
         Box(modifier = Modifier.fillMaxSize()) {
             TitledGrid(
                 carInfo = carInfoValue,
-                onClick = { carDetailsViewModel.verify(it) }
+                onClick = { carDetailsViewModel.verify(it) },
+                onDelete = { carDetailsViewModel.delete(it) }
             )
             Button(
                 modifier = Modifier
                     .padding(10.dp)
                     .align(Alignment.BottomCenter),
                 enabled = false,
-                onClick = { /*TODO*/ }
+                onClick = {
+                    carDetailsViewModel.departCar()
+                    onDepartCar(carInfoValue.id)
+                }
             ) {
                 Text("Дозволити відправлення")
             }
@@ -94,7 +101,8 @@ fun CarDetailsContent(
 @Composable
 fun TitledGrid(
     carInfo: VerifiedCar,
-    onClick: (String) -> Unit
+    onClick: (String) -> Unit,
+    onDelete: (String) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -116,13 +124,17 @@ fun TitledGrid(
                 }
                 item {
                     Row(horizontalArrangement = Arrangement.End) {
-                        IconButton(onClick = { /*TODO: navigate to scan label*/ }) {
+                        IconButton(onClick = { /*TODO: navigate to scan label and then call viewModel.addToCar*/ }) {
                             Image(Icons.Default.Add, "")
                         }
                     }
                 }
                 items(carInfo.sealedCargo) {
-                    CargoCard(cargo = it, onClick = onClick)
+                    CargoCard(
+                        cargo = it,
+                        onClick = onClick,
+                        onDelete = onDelete
+                    )
                 }
                 if(carInfo.sealedCargo.size % 2 != 0) {
                     item { Spacer(Modifier.width(0.dp)) }
@@ -136,13 +148,17 @@ fun TitledGrid(
                     }
                     item {
                         Row(horizontalArrangement = Arrangement.End) {
-                            IconButton(onClick = { /*TODO: navigate to scan label*/ }) {
+                            IconButton(onClick = { /*TODO: navigate to scan label and then call viewModel.addToTrailer*/ }) {
                                 Image(Icons.Default.Add, "")
                             }
                         }
                     }
                     items(trailer.sealedCargo) {
-                        CargoCard(cargo = it, onClick = onClick)
+                        CargoCard(
+                            cargo = it,
+                            onClick = onClick,
+                            onDelete = onDelete
+                        )
                     }
                 }
             }
@@ -191,13 +207,14 @@ fun VerificationStatus(
 @Composable
 fun CargoCard(
     cargo: VerifiedSealedCargo,
-    onClick: (String) -> Unit
+    onClick: (String) -> Unit,
+    onDelete: (String) -> Unit
 ) {
     val openDialog = remember { mutableStateOf(false) }
     if (openDialog.value) {
         DeleteAlertDialog(
             onDismiss = { openDialog.value = false },
-            onConfirm = { /*TODO*/ }
+            onConfirm = { onDelete(cargo.wrapped.number) }
         )
     }
     Card(
