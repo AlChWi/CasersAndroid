@@ -9,7 +9,6 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -28,7 +27,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import com.nure.caserskernel.R
+import com.nure.caserskernel.screens.carDetails.CarDetailsViewModel
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -43,9 +42,16 @@ suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutin
 
 @Composable
 fun TextRecognition(
-    profileViewModel: TextRecognitionViewModel = viewModel(),
-    navController: NavController
+    carDetailsViewModel: CarDetailsViewModel = viewModel(),
+    navController: NavController,
+    action: String,
+    vehType: String,
+    vehId: String,
+    itemId: String
 ) {
+    if(action.equals("add")) {
+        carDetailsViewModel.onAppear(vehId)
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -61,13 +67,25 @@ fun TextRecognition(
             )
         },
     ) {
-        TextRecognizer()
+        TextRecognizer {
+            if(!it.equals("")){
+                if(action.equals("add")) {
+                    if(vehType.equals("car")) {
+                        carDetailsViewModel.addToCar(it)
+                    } else if(vehType.equals("trailer")) {
+                        carDetailsViewModel.addToTrailer(it)
+                    }
+                } else if(action.equals("verify")) {
+                    carDetailsViewModel.verify(it)
+                }
+                navController.popBackStack()
+            }
+        }
     }
 }
 
 @Composable
-fun TextRecognizer() {
-
+fun TextRecognizer(textRecognitionCompletion: (String) -> Unit) {
     val extractedText = remember { mutableStateOf("") }
     Column(
         Modifier.fillMaxSize(),
@@ -77,10 +95,11 @@ fun TextRecognizer() {
         CameraPreview(extractedText)
         Text(
             text = extractedText.value,
-            modifier = Modifier.fillMaxWidth()
-                .background(color = Color.White)
-                .padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         )
+        Button(onClick = { textRecognitionCompletion(extractedText.value) }) {
+            Text("Додати")
+        }
     }
 }
 
@@ -99,8 +118,7 @@ fun CameraPreview(extractedText: MutableState<String>) {
         PreviewView(context)
     }
 
-    AndroidView(factory = { previewView },
-        modifier = Modifier.fillMaxSize()) {
+    AndroidView(factory = { previewView }) {
 
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
@@ -120,14 +138,10 @@ fun CameraPreview(extractedText: MutableState<String>) {
                     )
                 }
 
-            // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
-                // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
-
-                // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
                     lifeCycleOwner, cameraSelector, preview, imageAnalyzer
                 )
@@ -156,36 +170,19 @@ class ObjectDetectorImageAnalyzer(
             textRecognizer.process(image)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
-                        extractedText.value = it.result?.text ?: ""
-                        System.out.println("ml text:")
-                        System.out.println(it.result?.text ?: "")
+                        val regex = """[a-zA-Z][0-9]{8}""".toRegex()
+                        val matchResult = regex.find(it.result?.text ?: "")
+                        val newText = matchResult?.value ?: ""
+                        if(!newText.equals("")) {
+                            extractedText.value = newText
+                        }
                     }
-//                    val resultText = it.result.text
-//                    System.out.println(resultText)
-//                    for (block in it.result.textBlocks) {
-//                        val blockText = block.text
-//                        System.out.println(blockText)
-//                        val blockCornerPoints = block.cornerPoints
-//                        val blockFrame = block.boundingBox
-//                        for (line in block.lines) {
-//                            val lineText = line.text
-//                            System.out.println(lineText)
-//                            val lineCornerPoints = line.cornerPoints
-//                            val lineFrame = line.boundingBox
-//                            for (element in line.elements) {
-//                                val elementText = element.text
-//                                System.out.println(elementText)
-//                                val elementCornerPoints = element.cornerPoints
-//                                val elementFrame = element.boundingBox
-//                            }
-//                        }
-//                    }
 
                     imageProxy.close()
                 }
-                    .addOnFailureListener { e ->
-                        System.out.println(e)
-                    }
+                .addOnFailureListener { e ->
+                    System.out.println(e)
+                }
         }
     }
 }

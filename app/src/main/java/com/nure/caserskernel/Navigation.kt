@@ -38,8 +38,14 @@ fun Navigation(
         composable(route = Screen.Start.route) {
             AppContent(navController = navController)
         }
-        composable(route = Screen.TextRecognition.route) {
-            TextRecognition(navController = navController)
+        composable(route = Screen.TextRecognition.route + "/{action}" + "/{vehType}" + "/{vehId}" + "/{itemId}") {
+            TextRecognition(
+                navController = navController,
+                action = it.arguments?.getString("action") ?: "",
+                vehType = it.arguments?.getString("vehType") ?: "",
+                vehId = it.arguments?.getString("vehId") ?: "",
+                itemId = it.arguments?.getString("itemId") ?: ""
+            )
         }
     }
 }

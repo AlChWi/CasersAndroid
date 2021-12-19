@@ -108,7 +108,7 @@ data class VerifiedCar(
     val registeredAt: Date,
     val driver: Driver,
     val trailer: VerifiedCarTrailer?,
-    val sealedCargo: MutableList<VerifiedSealedCargo>
+    var sealedCargo: MutableList<VerifiedSealedCargo>
 ) {
     fun toEntity(): CarEntity {
         return CarEntity(
@@ -123,7 +123,7 @@ data class VerifiedCar(
 data class VerifiedCarTrailer(
     val id: String,
     val sign: String,
-    val sealedCargo: MutableList<VerifiedSealedCargo>
+    var sealedCargo: MutableList<VerifiedSealedCargo>
 ) {
     fun toEntity(carID: String): CarTrailerEntity {
         return CarTrailerEntity(

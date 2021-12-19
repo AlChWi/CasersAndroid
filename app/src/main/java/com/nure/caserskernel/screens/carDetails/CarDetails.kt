@@ -83,7 +83,7 @@ fun CarDetailsContent(
         Box(modifier = Modifier.fillMaxSize()) {
             TitledGrid(
                 carInfo = carInfoValue,
-                onClick = { carDetailsViewModel.verify(it) },
+                onClick = { navController.navigate(Screen.TextRecognition.withArgs("verify", "any", carInfoValue.id, it)) },
                 onDelete = { carDetailsViewModel.delete(it) },
                 navController = navController
             )
@@ -134,8 +134,7 @@ fun TitledGrid(
                 item {
                     Row(horizontalArrangement = Arrangement.End) {
                         IconButton(onClick = {
-                        /*TODO: navigate to scan label and then call viewModel.addToCar*/
-                            navController.navigate(Screen.TextRecognition.route)
+                            navController.navigate(Screen.TextRecognition.withArgs("add", "car", carInfo.id, "-"))
                         }) {
                             Image(Icons.Default.Add, "")
                         }
@@ -161,8 +160,7 @@ fun TitledGrid(
                     item {
                         Row(horizontalArrangement = Arrangement.End) {
                             IconButton(onClick = {
-                            /*TODO: navigate to scan label and then call viewModel.addToTrailer*/
-                                navController.navigate(Screen.TextRecognition.route)
+                                navController.navigate(Screen.TextRecognition.withArgs("add", "trailer", carInfo.id, trailer.id))
                             }) {
                                 Image(Icons.Default.Add, "")
                             }
