@@ -1,5 +1,8 @@
 package com.nure.caserskernel.screens.carDetails
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -24,6 +27,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.nure.caserskernel.R
+import com.nure.caserskernel.Screen
 import com.nure.caserskernel.service.cars.VerifiedCar
 import com.nure.caserskernel.service.cars.VerifiedSealedCargo
 
@@ -59,7 +64,8 @@ fun CarDetails(
     ) {
         CarDetailsContent(
             carDetailsViewModel = carDetailsViewModel,
-            onDepartCar = { navController.popBackStack() }
+            onDepartCar = { navController.popBackStack() },
+            navController = navController
         )
     }
 }
@@ -68,7 +74,8 @@ fun CarDetails(
 @Composable
 fun CarDetailsContent(
     carDetailsViewModel: CarDetailsViewModel,
-    onDepartCar: (String) -> Unit
+    onDepartCar: (String) -> Unit,
+    navController: NavController
 ) {
     val carInfo = carDetailsViewModel.carInfo.observeAsState()
     val carInfoValue = carInfo.value
@@ -77,7 +84,8 @@ fun CarDetailsContent(
             TitledGrid(
                 carInfo = carInfoValue,
                 onClick = { carDetailsViewModel.verify(it) },
-                onDelete = { carDetailsViewModel.delete(it) }
+                onDelete = { carDetailsViewModel.delete(it) },
+                navController = navController
             )
             Button(
                 modifier = Modifier
@@ -102,7 +110,8 @@ fun CarDetailsContent(
 fun TitledGrid(
     carInfo: VerifiedCar,
     onClick: (String) -> Unit,
-    onDelete: (String) -> Unit
+    onDelete: (String) -> Unit,
+    navController: NavController
 ) {
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -124,7 +133,10 @@ fun TitledGrid(
                 }
                 item {
                     Row(horizontalArrangement = Arrangement.End) {
-                        IconButton(onClick = { /*TODO: navigate to scan label and then call viewModel.addToCar*/ }) {
+                        IconButton(onClick = {
+                        /*TODO: navigate to scan label and then call viewModel.addToCar*/
+                            navController.navigate(Screen.TextRecognition.route)
+                        }) {
                             Image(Icons.Default.Add, "")
                         }
                     }
@@ -148,7 +160,10 @@ fun TitledGrid(
                     }
                     item {
                         Row(horizontalArrangement = Arrangement.End) {
-                            IconButton(onClick = { /*TODO: navigate to scan label and then call viewModel.addToTrailer*/ }) {
+                            IconButton(onClick = {
+                            /*TODO: navigate to scan label and then call viewModel.addToTrailer*/
+                                navController.navigate(Screen.TextRecognition.route)
+                            }) {
                                 Image(Icons.Default.Add, "")
                             }
                         }

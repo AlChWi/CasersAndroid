@@ -11,6 +11,7 @@ import com.nure.caserskernel.screens.carDetails.CarDetails
 import com.nure.caserskernel.screens.home.Home
 import com.nure.caserskernel.screens.login.LoginContent
 import com.nure.caserskernel.screens.profile.Profile
+import com.nure.caserskernel.screens.textRecognition.TextRecognition
 
 @ExperimentalFoundationApi
 @Composable
@@ -36,6 +37,9 @@ fun Navigation(
         }
         composable(route = Screen.Start.route) {
             AppContent(navController = navController)
+        }
+        composable(route = Screen.TextRecognition.route) {
+            TextRecognition(navController = navController)
         }
     }
 }
