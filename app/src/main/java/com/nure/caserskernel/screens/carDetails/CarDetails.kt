@@ -87,11 +87,24 @@ fun CarDetailsContent(
                 onDelete = { carDetailsViewModel.delete(it) },
                 navController = navController
             )
+            var check = !(carDetailsViewModel.carInfo.value?.sealedCargo?.isEmpty() ?: true) || !(carDetailsViewModel.carInfo.value?.trailer?.sealedCargo?.isEmpty() ?: true)
+            for(car in carDetailsViewModel.carInfo.value?.sealedCargo ?: listOf()) {
+                if(!car.isVerified) {
+                    check = false
+                    break
+                }
+            }
+            for(car in carDetailsViewModel.carInfo.value?.trailer?.sealedCargo ?: listOf()) {
+                if(!car.isVerified) {
+                    check = false
+                    break
+                }
+            }
             Button(
                 modifier = Modifier
                     .padding(10.dp)
                     .align(Alignment.BottomCenter),
-                enabled = false,
+                enabled = check,
                 onClick = {
                     carDetailsViewModel.departCar()
                     onDepartCar(carInfoValue.id)

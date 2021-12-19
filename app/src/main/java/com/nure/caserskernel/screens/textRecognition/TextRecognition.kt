@@ -20,6 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -90,36 +92,39 @@ fun TextRecognizer(textRecognitionCompletion: (String) -> Unit) {
     Column(
         Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
-        CameraPreview(extractedText)
+        CameraPreview(extractedText,
+        modifier = Modifier.fillMaxHeight(0.8F))
+        Spacer(Modifier.height(16.dp))
         Text(
             text = extractedText.value,
-            modifier = Modifier.padding(16.dp)
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
         )
-        Button(onClick = { textRecognitionCompletion(extractedText.value) }) {
-            Text("Додати")
+        Spacer(Modifier.height(16.dp))
+        Button(
+            onClick = { textRecognitionCompletion(extractedText.value) }) {
+            Text("Пiдтвердити",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.height(32.dp))
         }
+        Spacer(Modifier.height(16.dp))
     }
 }
 
 @Composable
-fun CameraPreview(extractedText: MutableState<String>) {
-
+fun CameraPreview(extractedText: MutableState<String>, modifier: Modifier) {
     val lifeCycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-
     val textRecognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
-
     val previewView = remember {
         PreviewView(context)
     }
-
-    AndroidView(factory = { previewView }) {
-
+    AndroidView(factory = { previewView }, modifier = modifier) {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             val preview = androidx.camera.core.Preview.Builder()
@@ -127,7 +132,6 @@ fun CameraPreview(extractedText: MutableState<String>) {
                 .also {
                     it.setSurfaceProvider(previewView.createSurfaceProvider())
                 }
-
             val imageAnalyzer = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
@@ -137,9 +141,7 @@ fun CameraPreview(extractedText: MutableState<String>) {
                         ObjectDetectorImageAnalyzer(textRecognizer, extractedText)
                     )
                 }
-
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
@@ -148,7 +150,6 @@ fun CameraPreview(extractedText: MutableState<String>) {
             } catch (exc: Exception) {
                 Log.e("CAMERA PREVIEW", "Use case binding failed", exc)
             }
-
         }, ContextCompat.getMainExecutor(context))
     }
 }
@@ -177,11 +178,7 @@ class ObjectDetectorImageAnalyzer(
                             extractedText.value = newText
                         }
                     }
-
                     imageProxy.close()
-                }
-                .addOnFailureListener { e ->
-                    System.out.println(e)
                 }
         }
     }

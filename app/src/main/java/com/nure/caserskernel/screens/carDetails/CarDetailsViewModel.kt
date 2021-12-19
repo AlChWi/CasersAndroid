@@ -39,11 +39,11 @@ class CarDetailsViewModel(application: Application) : AndroidViewModel(applicati
     fun onAppear(carID: String) {
         this.carID = carID
         GlobalScope.launch {
-            //if (ConnectivityChecker.isOnline(getApplication<Application>().applicationContext)) {
-            //    downloadDataFromInternet(carID)
-            //} else {
+            if (ConnectivityChecker.isOnline(getApplication<Application>().applicationContext)) {
+                downloadDataFromInternet(carID)
+            } else {
                 fetchDataFromDB(carID)
-            //}
+            }
         }
     }
 
