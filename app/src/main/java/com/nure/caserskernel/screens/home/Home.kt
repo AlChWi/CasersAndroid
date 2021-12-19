@@ -53,28 +53,32 @@ fun Home(
             )
         },
     ) {
-        val items = homeViewModel.listItems.observeAsState(initial = listOf())
+        val items = homeViewModel.listItems.observeAsState()
         homeViewModel.onAppear()
-        Surface {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = 12.dp,
-                    top = 16.dp,
-                    end = 12.dp,
-                    bottom = 16.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(
-                    items = items.value
+        if (items.value != null) {
+            Surface {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        top = 16.dp,
+                        end = 12.dp,
+                        bottom = 16.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    HomeScreenCard(
-                        it,
-                        onClick = { navController.navigate(Screen.CarDetailsScreen.withArgs(it.id)) }
-                    )
+                    items(
+                        items = items.value!!
+                    ) {
+                        HomeScreenCard(
+                            it,
+                            onClick = { navController.navigate(Screen.CarDetailsScreen.withArgs(it.id)) }
+                        )
+                    }
                 }
             }
+        } else {
+            CircularProgressIndicator()
         }
     }
 }

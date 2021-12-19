@@ -80,15 +80,17 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun saveData(cars: List<Car>) {
         cars.forEach { car ->
-            carsDBRepository.insert(car.toEntity())
-            car.trailer?.let { trailer ->
-                carsDBRepository.insert(trailer.toEntity(car.id))
-                trailer.sealedCargo.forEach { cargo ->
-                    carsDBRepository.insert(cargo.toTrailerCargoEntity(trailer.id))
+            if(carsDBRepository.getCar(car.id)?.equals(null) ?: true) {
+                carsDBRepository.insert(car.toEntity())
+                car.trailer?.let { trailer ->
+                    carsDBRepository.insert(trailer.toEntity(car.id))
+                    trailer.sealedCargo.forEach { cargo ->
+                        carsDBRepository.insert(cargo.toTrailerCargoEntity(trailer.id))
+                    }
                 }
-            }
-            car.sealedCargo.forEach { cargo ->
-                carsDBRepository.insert(cargo.toCarCargoEntity(car.id))
+                car.sealedCargo.forEach { cargo ->
+                    carsDBRepository.insert(cargo.toCarCargoEntity(car.id))
+                }
             }
         }
     }

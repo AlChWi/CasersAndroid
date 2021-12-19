@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import com.nure.caserskernel.database.AppDatabase
 import com.nure.caserskernel.database.CarsRepository
 import com.nure.caserskernel.database.entities.CarServiceCallEntity
+import com.nure.caserskernel.database.entities.SealedCargoEntity
 import com.nure.caserskernel.database.entities.ServiceCallType
 import com.nure.caserskernel.service.ConnectivityChecker
 import com.nure.caserskernel.service.cars.Car
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class CarDetailsViewModel(application: Application) : AndroidViewModel(application) {
     val carsRepo: CarsRepo by lazy {
@@ -92,32 +94,44 @@ class CarDetailsViewModel(application: Application) : AndroidViewModel(applicati
 
     fun addToCar(cargoNumber: String) {
         GlobalScope.launch {
-            // TODO: SAVE TO DB
-            if (ConnectivityChecker.isOnline(getApplication<Application>().applicationContext)) {
-                carsRepo.addCarCargo(carID ?: "", cargoNumber)
-            } else {
-                val parameters = mapOf("carID" to (carID ?: ""), "cargoNumber" to cargoNumber)
-                val request = CarServiceCallEntity(
-                    type = ServiceCallType.AddCarCargo,
-                    parameters = parameters
-                )
-                carsDBRepository.insert(request)
+            if(carsDBRepository.getCargoByNumber(cargoNumber)?.equals(null) ?: true) {
+                carsDBRepository.insert(SealedCargoEntity(id = UUID.randomUUID().toString(),
+                    number = cargoNumber,
+                    trailerID = null,
+                    carID = carID ?: "",
+                    isVerified = true))
+                if (ConnectivityChecker.isOnline(getApplication<Application>().applicationContext)) {
+                    carsRepo.addCarCargo(carID ?: "", cargoNumber)
+                } else {
+                    val parameters = mapOf("carID" to (carID ?: ""), "cargoNumber" to cargoNumber)
+                    val request = CarServiceCallEntity(
+                        type = ServiceCallType.AddCarCargo,
+                        parameters = parameters
+                    )
+                    carsDBRepository.insert(request)
+                }
             }
         }
     }
 
     fun addToTrailer(cargoNumber: String) {
         GlobalScope.launch {
-            // TODO: SAVE TO DB
-            if (ConnectivityChecker.isOnline(getApplication<Application>().applicationContext)) {
-                carsRepo.addTrailerCargo(carID ?: "", cargoNumber)
-            } else {
-                val parameters = mapOf("trailerID" to (carInfo.value?.trailer?.id ?: ""), "cargoNumber" to cargoNumber)
-                val request = CarServiceCallEntity(
-                    type = ServiceCallType.AddTrailerCargo,
-                    parameters = parameters
-                )
-                carsDBRepository.insert(request)
+            if(carsDBRepository.getCargoByNumber(cargoNumber)?.equals(null) ?: true) {
+                carsDBRepository.insert(SealedCargoEntity(id = UUID.randomUUID().toString(),
+                    number = cargoNumber,
+                    trailerID = carInfo.value?.trailer?.id ?: "",
+                    carID = null,
+                    isVerified = true))
+                if (ConnectivityChecker.isOnline(getApplication<Application>().applicationContext)) {
+                    carsRepo.addTrailerCargo(carID ?: "", cargoNumber)
+                } else {
+                    val parameters = mapOf("trailerID" to (carInfo.value?.trailer?.id ?: ""), "cargoNumber" to cargoNumber)
+                    val request = CarServiceCallEntity(
+                        type = ServiceCallType.AddTrailerCargo,
+                        parameters = parameters
+                    )
+                    carsDBRepository.insert(request)
+                }
             }
         }
     }
@@ -143,6 +157,18 @@ class CarDetailsViewModel(application: Application) : AndroidViewModel(applicati
         withContext(Dispatchers.Main) {
             if(result.isSuccessful) {
                 _carInfo.value = result.body()?.toVerifiedCar()
+                val carCargo = _carInfo.value?.sealedCargo?.map { cargo ->
+                    val cargoFromBD = carsDBRepository.getCargoByNumber(cargo.wrapped.number)
+                    cargo.isVerified = cargoFromBD?.isVerified ?: false
+                    cargo
+                }
+                val trailerCargo = _carInfo.value?.trailer?.sealedCargo?.map { cargo ->
+                    val cargoFromBD = carsDBRepository.getCargoByNumber(cargo.wrapped.number)
+                    cargo.isVerified = cargoFromBD?.isVerified ?: false
+                    cargo
+                }
+                _carInfo.value?.sealedCargo = carCargo?.toMutableList() ?: mutableListOf()
+                _carInfo.value?.trailer?.sealedCargo = trailerCargo?.toMutableList() ?: mutableListOf()
             }
         }
     }
