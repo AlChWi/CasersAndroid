@@ -6,6 +6,7 @@ sealed class Screen(val route: String) {
     object Profile: Screen("Profile")
     object Start: Screen("Start")
     object TextRecognition: Screen("TextRecognition")
+    object CargoDeletion: Screen("CargoDeletion")
 
     fun withArgs(vararg args: String): String {
         return buildString {

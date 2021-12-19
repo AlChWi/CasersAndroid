@@ -84,7 +84,7 @@ fun CarDetailsContent(
             TitledGrid(
                 carInfo = carInfoValue,
                 onClick = { navController.navigate(Screen.TextRecognition.withArgs("verify", "any", carInfoValue.id, it)) },
-                onDelete = { carDetailsViewModel.delete(it) },
+                onDelete = { navController.navigate(Screen.CargoDeletion.withArgs(carInfoValue.id, it)) },
                 navController = navController
             )
             var check = !(carDetailsViewModel.carInfo.value?.sealedCargo?.isEmpty() ?: true) || !(carDetailsViewModel.carInfo.value?.trailer?.sealedCargo?.isEmpty() ?: true)
@@ -129,6 +129,8 @@ fun TitledGrid(
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
+        val carItems = remember { mutableStateOf(carInfo.sealedCargo) }
+        val trailerItems = remember { mutableStateOf(carInfo.trailer?.sealedCargo) }
         LazyVerticalGrid(
             cells = GridCells.Fixed(2),
             contentPadding = PaddingValues(
@@ -236,13 +238,6 @@ fun CargoCard(
     onClick: (String) -> Unit,
     onDelete: (String) -> Unit
 ) {
-    val openDialog = remember { mutableStateOf(false) }
-    if (openDialog.value) {
-        DeleteAlertDialog(
-            onDismiss = { openDialog.value = false },
-            onConfirm = { onDelete(cargo.wrapped.number) }
-        )
-    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -269,7 +264,7 @@ fun CargoCard(
                 Spacer(Modifier.width(12.dp))
                 IconButton(
                     onClick = {
-                        openDialog.value = true
+                        onDelete(cargo.wrapped.number)
                     }
                 ) {
                     Image(
@@ -280,34 +275,4 @@ fun CargoCard(
             }
         }
     }
-}
-
-@Composable
-fun DeleteAlertDialog(
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = "Видалення ЗПУ")
-        },
-        text = {
-            Text("Ви впевнені, що хочете видалите це ЗПУ зі списку?")
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm
-            ) {
-                Text("Видалити")
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = onDismiss
-            ) {
-                Text("Скасувати")
-            }
-        }
-    )
 }

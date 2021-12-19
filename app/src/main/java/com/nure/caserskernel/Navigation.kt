@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.nure.caserskernel.screens.carDetails.CarDetails
+import com.nure.caserskernel.screens.cargoDeletion.CargoDeletion
 import com.nure.caserskernel.screens.home.Home
 import com.nure.caserskernel.screens.login.LoginContent
 import com.nure.caserskernel.screens.profile.Profile
@@ -43,6 +44,13 @@ fun Navigation(
                 navController = navController,
                 action = it.arguments?.getString("action") ?: "",
                 vehType = it.arguments?.getString("vehType") ?: "",
+                vehId = it.arguments?.getString("vehId") ?: "",
+                itemId = it.arguments?.getString("itemId") ?: ""
+            )
+        }
+        composable(route = Screen.CargoDeletion.route + "/{vehId}" + "/{itemId}") {
+            CargoDeletion(
+                navController = navController,
                 vehId = it.arguments?.getString("vehId") ?: "",
                 itemId = it.arguments?.getString("itemId") ?: ""
             )
