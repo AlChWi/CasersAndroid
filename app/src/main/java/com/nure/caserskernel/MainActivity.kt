@@ -69,13 +69,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             _isAuthenticated.value = true
         } else {
             AuthService.setToken(null)
-        }
-        AuthService.onChangeToken = {
-            if (token != null && userID != null) {
-                _isAuthenticated.value = true
-            } else {
-                _isAuthenticated.value = false
-            }
+            _isAuthenticated.value = false
         }
     }
 }
